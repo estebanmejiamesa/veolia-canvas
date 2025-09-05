@@ -229,6 +229,13 @@ function classNames(...xs: Array<string | false | null | undefined>): string {
   return xs.filter(Boolean).join(" ");
 }
 
+// 🔎 Normalizador: minúsculas y sin acentos (funciona en todos los navegadores)
+const norm = (s: string) =>
+  (s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, ""); // quita tildes/acentos
+
 function SoftBadge({ children }: { children: React.ReactNode }) {
   return (
     <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-xs tracking-wide">
@@ -405,19 +412,28 @@ export default function VeoliaFeedforwardCanvas() {
     }));
   };
 
+  // 🔎 Normalizador: minúsculas + sin acentos (necesario para la búsqueda)
+
   const filteredBlocks = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = norm(query.trim());
     if (!q) return BLOCKS;
+
     return BLOCKS.map((b) => ({
       ...b,
       casillas: b.casillas.filter((c) => {
-        const inTitle = c.title.toLowerCase().includes(q);
-        const inFeed = c.feedforward.toLowerCase().includes(q);
-        const inQs = c.preguntas.some((p) => p.toLowerCase().includes(q));
-        return inTitle || inFeed || inQs;
+        const inTitle = norm(c.title).includes(q);
+        const inFeed = norm(c.feedforward).includes(q);
+        const inQs = c.preguntas.some((p) => norm(p).includes(q));
+
+        // ✅ ahora también busca dentro de las respuestas escritas por el usuario
+        const inAns = Object.values(answers[c.id] || {}).some((v) =>
+          norm(String(v)).includes(q)
+        );
+
+        return inTitle || inFeed || inQs || inAns;
       }),
     })).filter((b) => b.casillas.length);
-  }, [query]);
+  }, [query, answers]); // 👈 agrega "answers" aquí
 
   // progreso
   const answeredCount = useMemo(() => {
