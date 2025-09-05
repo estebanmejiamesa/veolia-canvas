@@ -943,46 +943,20 @@ export default function VeoliaFeedforwardCanvas() {
         ))}
 
         <div className="mt-10 mb-20 text-center text-sm text-[var(--text-muted)]">
-          {/* Consejo + footer */}
-          <div className="mt-10 mb-20 text-center text-sm text-[var(--text-muted)]">
-            <p>
-              Consejo: usa{" "}
-              <span className="text-[var(--text)] font-medium">Exportar</span>{" "}
-              para descargar las respuestas a tu dispositivo, e{" "}
-              <span className="text-[var(--text)] font-medium">Importar</span>{" "}
-              para continuar donde quedaste.
-            </p>
+          <p>
+            Consejo: usa{" "}
+            <span className="text-[var(--text)] font-medium">Exportar</span>{" "}
+            para descargar las respuestas a tu dispositivo, e{" "}
+            <span className="text-[var(--text)] font-medium">Importar</span>{" "}
+            para continuar donde quedaste.
+          </p>
 
-            <br />
+          <br />
 
-            <p className="leading-relaxed">
-              © 2025 IBIIKA S.A.S. All rights reserved. ·{" "}
-              <a
-                href="https://www.ibiika.com"
-                target="_blank"
-                rel="noreferrer"
-                className="text-[var(--text)] hover:underline"
-              >
-                www.ibiika.com
-              </a>{" "}
-              · Esteban Mejía Mesa ·{" "}
-              <a
-                href="mailto:emejia@ibiika.com"
-                className="text-[var(--text)] hover:underline"
-              >
-                emejia@ibiika.com
-              </a>{" "}
-              · WhatsApp:{" "}
-              <a
-                href="https://wa.me/573186515140"
-                target="_blank"
-                rel="noreferrer"
-                className="text-[var(--text)] hover:underline"
-              >
-                +57 318 651 5140
-              </a>
-            </p>
-          </div>
+          <p className="leading-relaxed">
+            © 2025 IBIIKA S.A.S. All rights reserved. · www.ibiika.com · Esteban
+            Mejía Mesa · emejia@ibiika.com · Cel: +57 318 651 5140
+          </p>
         </div>
       </main>
     </div>
