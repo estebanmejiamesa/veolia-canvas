@@ -1,4 +1,3 @@
-
 // src/firebase.ts
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
@@ -11,7 +10,7 @@ const firebaseConfig = {
   projectId: "veolia-e2b97",
   storageBucket: "veolia-e2b97.firebasestorage.app",
   messagingSenderId: "178382545075",
-  appId: "1:178382545075:web:3891ddeb029046d85c10c6"
+  appId: "1:178382545075:web:3891ddeb029046d85c10c6",
 };
 
 // Inicializa Firebase una sola vez

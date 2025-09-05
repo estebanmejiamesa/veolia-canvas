@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
+// Firebase
+import { db, auth } from "./firebase";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
+
 /**
  * IDEO-Style Feedforward Canvas – Veolia Matrix
  */
@@ -398,11 +403,125 @@ export default function VeoliaFeedforwardCanvas() {
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Estado para deshabilitar botones mientras trabajan
+  const [busy, setBusy] = useState<null | "save" | "reload">(null);
+
+  // Guarda YA en Firestore (manual)
+  const saveNow = async () => {
+    try {
+      setBusy("save");
+      const ref = doc(db, "canvasSessions", sessionId);
+      await setDoc(
+        ref,
+        {
+          answers,
+          updatedAt: serverTimestamp(),
+          manualSaveAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+      alert("✅ Guardado en la nube.");
+    } catch (e) {
+      console.warn(e);
+      alert("❌ No se pudo guardar en la nube.");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  // Fuerza recarga desde Firestore (pisa lo local)
+  const reloadFromCloud = async () => {
+    if (
+      !confirm(
+        "Esto reemplazará lo que tienes localmente con lo de la nube. ¿Continuar?"
+      )
+    )
+      return;
+    try {
+      setBusy("reload");
+      const ref = doc(db, "canvasSessions", sessionId);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) {
+        alert("No hay datos en la nube para esta sesión.");
+        return;
+      }
+      const data = snap.data() as { answers?: AnswerMap };
+      setAnswers(data.answers || {});
+      alert("☁️ Datos recargados desde la nube.");
+    } catch (e) {
+      console.warn(e);
+      alert("❌ No se pudo recargar desde la nube.");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  // 1) 🔐 Auth anónima + carga inicial desde Firestore (si existe algo)
+  useEffect(() => {
+    let mounted = true;
+
+    const ensureAuthAndLoad = async () => {
+      // Espera a que haya usuario; si no hay, crea uno anónimo
+      await new Promise<void>((resolve) => {
+        const unsub = onAuthStateChanged(auth, async (user) => {
+          if (!user) {
+            await signInAnonymously(auth);
+          }
+          unsub();
+          resolve();
+        });
+      });
+
+      // Carga inicial desde Firestore
+      try {
+        const ref = doc(db, "canvasSessions", sessionId);
+        const snap = await getDoc(ref);
+        if (mounted && snap.exists()) {
+          const data = snap.data() as { answers?: AnswerMap };
+          if (data?.answers && typeof data.answers === "object") {
+            setAnswers(data.answers); // pisa siempre lo local con lo de la nube
+          }
+        }
+      } catch (e) {
+        console.warn("No se pudo cargar desde Firestore:", e);
+      }
+    };
+
+    ensureAuthAndLoad();
+    return () => {
+      mounted = false;
+    };
+  }, [sessionId]);
+
+  // 2) 💾 Guardado en localStorage (como ya tenías)
   useEffect(() => {
     localStorage.setItem(
       `veolia_canvas_answers_${sessionId}`,
       JSON.stringify(answers)
     );
+  }, [answers, sessionId]);
+
+  // 3) ☁️ Autosave en Firestore (debounced)
+  useEffect(() => {
+    const save = async () => {
+      try {
+        const ref = doc(db, "canvasSessions", sessionId);
+        await setDoc(
+          ref,
+          {
+            answers,
+            updatedAt: serverTimestamp(),
+          },
+          { merge: true }
+        );
+      } catch (e) {
+        console.warn("No se pudo guardar en Firestore:", e);
+      }
+    };
+
+    // Pequeño debounce para no escribir en cada tecla
+    const t = setTimeout(save, 600);
+    return () => clearTimeout(t);
   }, [answers, sessionId]);
 
   const handleChange = (casillaId: string, qIdx: number, value: string) => {
@@ -677,6 +796,32 @@ export default function VeoliaFeedforwardCanvas() {
                 className="w-[280px] sm:w-[360px] rounded-xl bg-[var(--surface)] border border-white/10 text-[var(--text)] placeholder:text-slate-300/60 pl-9 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
               />
             </label>
+
+            {/* Guardar YA en nube */}
+            <button
+              onClick={saveNow}
+              disabled={busy !== null}
+              className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)]/10 text-[var(--text)] px-3 py-2 hover:bg-[var(--primary)]/20 border border-[var(--primary)]/30 disabled:opacity-50"
+              title="Guardar ahora en Firestore"
+            >
+              ☁️↑
+              <span className="hidden sm:inline">
+                {busy === "save" ? "Guardando..." : "Guardar nube"}
+              </span>
+            </button>
+
+            {/* Recargar desde nube */}
+            <button
+              onClick={reloadFromCloud}
+              disabled={busy !== null}
+              className="inline-flex items-center gap-2 rounded-xl bg-white/5 text-[var(--text)] px-3 py-2 hover:bg-white/10 border border-white/10 disabled:opacity-50"
+              title="Recargar desde Firestore (reemplaza lo local)"
+            >
+              ☁️↓
+              <span className="hidden sm:inline">
+                {busy === "reload" ? "Cargando..." : "Recargar nube"}
+              </span>
+            </button>
 
             {/* Export */}
             <button
