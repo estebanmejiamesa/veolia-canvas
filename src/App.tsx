@@ -234,12 +234,9 @@ function classNames(...xs: Array<string | false | null | undefined>): string {
   return xs.filter(Boolean).join(" ");
 }
 
-// 🔎 Normalizador: minúsculas y sin acentos (funciona en todos los navegadores)
+// Normalizador (minúsculas + sin acentos)
 const norm = (s: string) =>
-  (s || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, ""); // quita tildes/acentos
+  (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
 function SoftBadge({ children }: { children: React.ReactNode }) {
   return (
@@ -251,63 +248,23 @@ function SoftBadge({ children }: { children: React.ReactNode }) {
 
 function IconSparkle({ className = "w-4 h-4" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      className={className}
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
       <path d="M12 3l1.6 3.9L18 8.5l-3.6 1.7L12 14l-2.4-3.8L6 8.5l4.4-1.6L12 3z" />
       <path d="M20 14l.9 2.2L23 17l-2.1.8L20 20l-.9-2.2L17 17l2.1-.8L20 14z" />
       <path d="M5 15l.8 1.8L8 17l-1.7.7L5 19l-.8-1.8L2 17l1.7-.2L5 15z" />
     </svg>
   );
 }
-function IconDownload({ className = "w-4 h-4" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      className={className}
-    >
-      <path
-        d="M12 3v12m0 0l-3.5-3.5M12 15l3.5-3.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path d="M5 21h14" strokeLinecap="round" />
-    </svg>
-  );
-}
 function IconTrash({ className = "w-4 h-4" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      className={className}
-    >
-      <path
-        d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
+      <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 function IconSearch({ className = "w-4 h-4" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      className={className}
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
       <circle cx="11" cy="11" r="7" />
       <path d="M20 20l-3-3" strokeLinecap="round" />
     </svg>
@@ -315,14 +272,15 @@ function IconSearch({ className = "w-4 h-4" }: { className?: string }) {
 }
 function IconCheck({ className = "w-4 h-4" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      className={className}
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
       <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function IconCloud({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
+      <path d="M6 18h11a4 4 0 0 0 .6-7.964A6 6 0 0 0 6 9a4 4 0 0 0 0 9z" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -336,7 +294,7 @@ export default function VeoliaFeedforwardCanvas() {
   // Copiar enlace
   const [copied, setCopied] = useState<boolean>(false);
 
-  // 🔐 Sesión única: primero intenta URL (query o hash). Si no hay, un sid POR PESTAÑA.
+  // 🔐 Sesión única
   function getSidFromLocation(): string | null {
     const url = new URL(window.location.href);
     const qsSid = url.searchParams.get("sid");
@@ -345,31 +303,29 @@ export default function VeoliaFeedforwardCanvas() {
     const m = hash.match(/(?:^|[#&?])sid=([^&]+)/i);
     return m ? decodeURIComponent(m[1]) : null;
   }
-
   function ensureSidInUrl(sid: string): void {
     const url = new URL(window.location.href);
-    url.searchParams.set("sid", sid); // query
+    url.searchParams.set("sid", sid);
     const hash = new URLSearchParams(url.hash.replace(/^#/, ""));
-    hash.set("sid", sid); // hash (respaldo)
+    hash.set("sid", sid);
     url.hash = hash.toString();
     window.history.replaceState({}, "", url);
   }
 
   const [sessionId] = useState<string>(() => {
-    // 1) Si viene en el enlace, úsalo (sesión compartida)
     const fromUrl = getSidFromLocation();
     if (fromUrl) {
       ensureSidInUrl(fromUrl);
       return fromUrl;
     }
-    // 2) Si no, crea un sid por pestaña (NO se comparte con otras pestañas)
-    let sid = sessionStorage.getItem("veolia_tab_sid");
-    if (!sid) {
-      sid = crypto?.randomUUID?.() || String(Date.now());
-      sessionStorage.setItem("veolia_tab_sid", sid);
-    }
+    const existing = sessionStorage.getItem("veolia_tab_sid");
+    let sid =
+      existing ??
+      ((typeof crypto !== "undefined" && (crypto as any)?.randomUUID?.()) ||
+        String(Date.now()));
+    if (!existing) sessionStorage.setItem("veolia_tab_sid", sid);
     ensureSidInUrl(sid);
-    return sid;
+    return sid as string;
   });
 
   function copySessionLink(): void {
@@ -401,89 +357,67 @@ export default function VeoliaFeedforwardCanvas() {
     const saved = localStorage.getItem(`veolia_canvas_answers_${sessionId}`);
     return saved ? (JSON.parse(saved) as AnswerMap) : {};
   });
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Estado para deshabilitar botones mientras trabajan
-  const [busy, setBusy] = useState<null | "save" | "reload">(null);
+  // Control autosave
+  const cloudReadyRef = useRef(false);
+  const skipAutosaveRef = useRef(false);
 
-  // Guarda YA en Firestore (manual)
-  const saveNow = async () => {
+  // Exportar lo que hay en la nube como TXT
+  async function exportCloudTXT() {
     try {
-      setBusy("save");
-      const ref = doc(db, "canvasSessions", sessionId);
-      await setDoc(
-        ref,
-        {
-          answers,
-          updatedAt: serverTimestamp(),
-          manualSaveAt: new Date().toISOString(),
-        },
-        { merge: true }
-      );
-      alert("✅ Guardado en la nube.");
-    } catch (e) {
-      console.warn(e);
-      alert("❌ No se pudo guardar en la nube.");
-    } finally {
-      setBusy(null);
-    }
-  };
-
-  // Fuerza recarga desde Firestore (pisa lo local)
-  const reloadFromCloud = async () => {
-    if (
-      !confirm(
-        "Esto reemplazará lo que tienes localmente con lo de la nube. ¿Continuar?"
-      )
-    )
-      return;
-    try {
-      setBusy("reload");
       const ref = doc(db, "canvasSessions", sessionId);
       const snap = await getDoc(ref);
       if (!snap.exists()) {
-        alert("No hay datos en la nube para esta sesión.");
+        alert("⚠️ No hay datos en la nube para esta sesión.");
         return;
       }
       const data = snap.data() as { answers?: AnswerMap };
-      setAnswers(data.answers || {});
-      alert("☁️ Datos recargados desde la nube.");
+      const text = buildPlainText(data.answers || {});
+      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a: HTMLAnchorElement = document.createElement("a");
+      a.href = url;
+      a.download = `Veolia-Feedforward-Cloud-${new Date().toISOString().slice(0, 10)}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     } catch (e) {
-      console.warn(e);
-      alert("❌ No se pudo recargar desde la nube.");
-    } finally {
-      setBusy(null);
+      console.error("❌ No se pudo exportar desde la nube:", e);
+      alert("❌ No se pudo exportar desde la nube.");
     }
-  };
+  }
 
-  // 1) 🔐 Auth anónima + carga inicial desde Firestore (si existe algo)
+  // 1) Auth anónima + CARGA INICIAL (y luego habilita autosave)
   useEffect(() => {
     let mounted = true;
+    cloudReadyRef.current = false;
 
     const ensureAuthAndLoad = async () => {
-      // Espera a que haya usuario; si no hay, crea uno anónimo
       await new Promise<void>((resolve) => {
         const unsub = onAuthStateChanged(auth, async (user) => {
-          if (!user) {
-            await signInAnonymously(auth);
-          }
+          if (!user) await signInAnonymously(auth);
           unsub();
           resolve();
         });
       });
 
-      // Carga inicial desde Firestore
       try {
         const ref = doc(db, "canvasSessions", sessionId);
         const snap = await getDoc(ref);
         if (mounted && snap.exists()) {
           const data = snap.data() as { answers?: AnswerMap };
           if (data?.answers && typeof data.answers === "object") {
-            setAnswers(data.answers); // pisa siempre lo local con lo de la nube
+            skipAutosaveRef.current = true;
+            setAnswers(data.answers);
+            localStorage.setItem(`veolia_canvas_answers_${sessionId}`, JSON.stringify(data.answers));
           }
         }
       } catch (e) {
         console.warn("No se pudo cargar desde Firestore:", e);
+      } finally {
+        cloudReadyRef.current = true;
       }
     };
 
@@ -493,34 +427,26 @@ export default function VeoliaFeedforwardCanvas() {
     };
   }, [sessionId]);
 
-  // 2) 💾 Guardado en localStorage (como ya tenías)
+  // 2) Guardado en localStorage
   useEffect(() => {
-    localStorage.setItem(
-      `veolia_canvas_answers_${sessionId}`,
-      JSON.stringify(answers)
-    );
+    localStorage.setItem(`veolia_canvas_answers_${sessionId}`, JSON.stringify(answers));
   }, [answers, sessionId]);
 
-  // 3) ☁️ Autosave en Firestore (debounced)
+  // 3) AUTOSAVE con debounce
   useEffect(() => {
-    const save = async () => {
+    if (!cloudReadyRef.current) return;
+    if (skipAutosaveRef.current) {
+      skipAutosaveRef.current = false;
+      return;
+    }
+    const t = setTimeout(async () => {
       try {
         const ref = doc(db, "canvasSessions", sessionId);
-        await setDoc(
-          ref,
-          {
-            answers,
-            updatedAt: serverTimestamp(),
-          },
-          { merge: true }
-        );
+        await setDoc(ref, { answers, updatedAt: serverTimestamp() }, { merge: true });
       } catch (e) {
-        console.warn("No se pudo guardar en Firestore:", e);
+        console.warn("Autosave Firestore falló:", e);
       }
-    };
-
-    // Pequeño debounce para no escribir en cada tecla
-    const t = setTimeout(save, 600);
+    }, 600);
     return () => clearTimeout(t);
   }, [answers, sessionId]);
 
@@ -531,28 +457,21 @@ export default function VeoliaFeedforwardCanvas() {
     }));
   };
 
-  // 🔎 Normalizador: minúsculas + sin acentos (necesario para la búsqueda)
-
+  // Filtro
   const filteredBlocks = useMemo(() => {
     const q = norm(query.trim());
     if (!q) return BLOCKS;
-
     return BLOCKS.map((b) => ({
       ...b,
       casillas: b.casillas.filter((c) => {
         const inTitle = norm(c.title).includes(q);
         const inFeed = norm(c.feedforward).includes(q);
         const inQs = c.preguntas.some((p) => norm(p).includes(q));
-
-        // ✅ ahora también busca dentro de las respuestas escritas por el usuario
-        const inAns = Object.values(answers[c.id] || {}).some((v) =>
-          norm(String(v)).includes(q)
-        );
-
+        const inAns = Object.values(answers[c.id] || {}).some((v) => norm(String(v)).includes(q));
         return inTitle || inFeed || inQs || inAns;
       }),
     })).filter((b) => b.casillas.length);
-  }, [query, answers]); // 👈 agrega "answers" aquí
+  }, [query, answers]);
 
   // progreso
   const answeredCount = useMemo(() => {
@@ -569,7 +488,6 @@ export default function VeoliaFeedforwardCanvas() {
   }, [answers]);
 
   const progressPct = Math.round((answeredCount / TOTAL_QUESTIONS) * 100);
-
   const answeredFor = (casillaId: string): number => {
     const vals = answers[casillaId];
     if (!vals) return 0;
@@ -582,7 +500,6 @@ export default function VeoliaFeedforwardCanvas() {
     L.push("Feedforward Canvas – Veolia");
     L.push(`Exportado: ${new Date().toLocaleString()}`);
     L.push("");
-
     BLOCKS.forEach((b) => {
       L.push(`=== ${b.title} ===`);
       b.casillas.forEach((c) => {
@@ -601,25 +518,8 @@ export default function VeoliaFeedforwardCanvas() {
       });
       L.push("");
     });
-
     const text = L.join("\n");
     return text.trim().length ? text : "No hay respuestas diligenciadas aún.";
-  }
-
-  // Exporta como .txt
-  function exportTXT(): void {
-    const text = buildPlainText(answers);
-    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a: HTMLAnchorElement = document.createElement("a");
-    a.href = url;
-    a.download = `Veolia-Feedforward-Canvas-${new Date()
-      .toISOString()
-      .slice(0, 10)}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
   }
 
   // Importa .json / .txt
@@ -634,9 +534,7 @@ export default function VeoliaFeedforwardCanvas() {
         .trim();
 
     const casillas = BLOCKS.flatMap((b) => b.casillas);
-    const titleToId = new Map<string, string>(
-      casillas.map((c) => [normalize(c.title), c.id])
-    );
+    const titleToId = new Map<string, string>(casillas.map((c) => [normalize(c.title), c.id]));
 
     const reader = new FileReader();
     reader.onload = () => {
@@ -644,17 +542,16 @@ export default function VeoliaFeedforwardCanvas() {
         const raw = String(reader.result).replace(/\r\n/g, "\n");
         const lowerName = file.name.toLowerCase();
 
-        // JSON
         if (lowerName.endsWith(".json")) {
           const data = JSON.parse(raw);
           if (data && data.answers && typeof data.answers === "object") {
+            skipAutosaveRef.current = true;
             setAnswers(data.answers as AnswerMap);
             return;
           }
           throw new Error("JSON inválido");
         }
 
-        // TXT
         if (lowerName.endsWith(".txt")) {
           const lines: string[] = raw.split("\n");
           const newAnswers: AnswerMap = {};
@@ -662,21 +559,13 @@ export default function VeoliaFeedforwardCanvas() {
           let currentPreguntaIdx: number | null = null;
           let buffer: string | null = null;
 
-          const isBlockHeader = (line: string) =>
-            /^===\s*.+?\s*===\s*$/.test(line.trim());
-          const isCasillaLine = (line: string) =>
-            /^--\s*.+?\s*--\s*$/.test(line.trim());
-          const getCasillaTitle = (line: string) =>
-            line.trim().replace(/^--\s*|\s*--$/g, "");
+          const isBlockHeader = (line: string) => /^===\s*.+?\s*===\s*$/.test(line.trim());
+          const isCasillaLine = (line: string) => /^--\s*.+?\s*--\s*$/.test(line.trim());
+          const getCasillaTitle = (line: string) => line.trim().replace(/^--\s*|\s*--$/g, "");
 
           const flushBuffer = () => {
-            if (
-              currentCasillaId &&
-              currentPreguntaIdx != null &&
-              buffer != null
-            ) {
-              if (!newAnswers[currentCasillaId])
-                newAnswers[currentCasillaId] = {} as Record<number, string>;
+            if (currentCasillaId && currentPreguntaIdx != null && buffer != null) {
+              if (!newAnswers[currentCasillaId]) newAnswers[currentCasillaId] = {} as Record<number, string>;
               newAnswers[currentCasillaId][currentPreguntaIdx] = buffer.trim();
             }
             buffer = null;
@@ -718,29 +607,29 @@ export default function VeoliaFeedforwardCanvas() {
           }
 
           flushBuffer();
+          skipAutosaveRef.current = true;
           setAnswers(newAnswers);
           return;
         }
 
-        alert(
-          "Formato no reconocido. Usa un .json o .txt exportado desde esta app."
-        );
+        alert("Formato no reconocido. Usa un .json o .txt exportado desde esta app.");
       } catch {
-        alert(
-          "Archivo inválido. Asegúrate de cargar un .json o .txt exportado desde este canvas."
-        );
+        alert("Archivo inválido. Asegúrate de cargar un .json o .txt exportado desde este canvas.");
       }
     };
     reader.readAsText(file);
   }
 
+  // Reset LOCAL (no sube {} a la nube)
   const resetAll = () => {
-    if (confirm("¿Borrar todas las respuestas del canvas?")) {
+    if (confirm("¿Borrar todas las respuestas del canvas (solo local)?")) {
+      skipAutosaveRef.current = true;
       setAnswers({});
       localStorage.removeItem(`veolia_canvas_answers_${sessionId}`);
     }
   };
 
+  // ---------------- UI ----------------
   return (
     <div
       className="min-h-screen w-full"
@@ -776,16 +665,15 @@ export default function VeoliaFeedforwardCanvas() {
                 Feedforward Canvas – Veolia
               </h1>
               <p className="text-xs text-[var(--text-muted)]">
-                Matrix by ibiika.com • 6 bloques • 12 casillas •{" "}
-                {TOTAL_QUESTIONS} preguntas
+                6 bloques • 12 casillas • {TOTAL_QUESTIONS} preguntas
               </p>
             </div>
           </div>
 
-          <div className="ml-auto flex items-center gap-2">
-            {/* Search */}
-            <label className="group relative inline-flex items-center">
-              <span className="absolute left-3 text-slate-300/70">
+          <div className="ml-auto flex items-center gap-2 min-w-0 justify-end">
+            {/* Buscador fijo a la derecha; 20% más corto en amplio (286px) y flexible en chico */}
+            <div className="group relative min-w-0 basis-[187px] sm:basis-[272px] md:basis-[286px] md:max-w-[286px] md:grow-0">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-300/70">
                 <IconSearch />
               </span>
               <input
@@ -793,50 +681,25 @@ export default function VeoliaFeedforwardCanvas() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Buscar en títulos, feedforward o preguntas…"
-                className="w-[280px] sm:w-[360px] rounded-xl bg-[var(--surface)] border border-white/10 text-[var(--text)] placeholder:text-slate-300/60 pl-9 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
+                className="h-10 w-full rounded-xl bg-[var(--surface)] border border-white/10 text-[var(--text)]
+                           placeholder:text-slate-300/60 pl-9 pr-3 focus:outline-none
+                           focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
               />
-            </label>
+            </div>
 
-            {/* Guardar YA en nube */}
+            {/* Botones: misma altura para alineación perfecta */}
             <button
-              onClick={saveNow}
-              disabled={busy !== null}
-              className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)]/10 text-[var(--text)] px-3 py-2 hover:bg-[var(--primary)]/20 border border-[var(--primary)]/30 disabled:opacity-50"
-              title="Guardar ahora en Firestore"
+              onClick={exportCloudTXT}
+              className="h-10 inline-flex items-center gap-2 rounded-xl bg-[var(--primary)]/10 text-[var(--text)] px-3 hover:bg-[var(--primary)]/20 border border-[var(--primary)]/30"
+              title="Descargar respuestas desde la nube (TXT)"
             >
-              ☁️↑
-              <span className="hidden sm:inline">
-                {busy === "save" ? "Guardando..." : "Guardar nube"}
-              </span>
-            </button>
-
-            {/* Recargar desde nube */}
-            <button
-              onClick={reloadFromCloud}
-              disabled={busy !== null}
-              className="inline-flex items-center gap-2 rounded-xl bg-white/5 text-[var(--text)] px-3 py-2 hover:bg-white/10 border border-white/10 disabled:opacity-50"
-              title="Recargar desde Firestore (reemplaza lo local)"
-            >
-              ☁️↓
-              <span className="hidden sm:inline">
-                {busy === "reload" ? "Cargando..." : "Recargar nube"}
-              </span>
-            </button>
-
-            {/* Export */}
-            <button
-              onClick={exportTXT}
-              className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)]/10 text-[var(--text)] px-3 py-2 hover:bg-[var(--primary)]/20 border border-[var(--primary)]/30"
-              title="Exportar respuestas (TXT)"
-            >
-              <IconDownload />
+              <IconCloud />
               <span className="hidden sm:inline">Exportar</span>
             </button>
 
-            {/* Import */}
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center gap-2 rounded-xl bg-[var(--accent)]/10 text-[var(--text)] px-3 py-2 hover:bg-[var(--accent)]/20 border border-[var(--accent)]/30"
+              className="h-10 inline-flex items-center gap-2 rounded-xl bg-[var(--accent)]/10 text-[var(--text)] px-3 hover:bg-[var(--accent)]/20 border border-[var(--accent)]/30"
               title="Importar respuestas"
             >
               ⤒<span className="hidden sm:inline">Importar</span>
@@ -853,29 +716,24 @@ export default function VeoliaFeedforwardCanvas() {
               }}
             />
 
-            {/* Copiar enlace */}
             <button
               onClick={copySessionLink}
-              className="inline-flex items-center gap-2 rounded-xl bg-white/5 text-[var(--text)] px-3 py-2 hover:bg-white/10 border border-white/10"
+              className="h-10 inline-flex items-center gap-2 rounded-xl bg-white/5 text-[var(--text)] px-3 hover:bg-white/10 border border-white/10"
               title="Copiar enlace de esta sesión"
             >
-              🔗
-              <span className="hidden sm:inline">
-                {copied ? "¡Copiado!" : "Compartir"}
-              </span>
+              🔗 <span className="hidden sm:inline">{copied ? "¡Copiado!" : "Compartir"}</span>
             </button>
 
-            {/* Reset */}
             <button
               onClick={resetAll}
-              className="inline-flex items-center gap-2 rounded-xl bg-white/5 text-[var(--text)] px-3 py-2 hover:bg-white/10 border border-white/10"
-              title="Borrar todas las respuestas"
+              className="h-10 inline-flex items-center gap-2 rounded-xl bg-white/5 text-[var(--text)] px-3 hover:bg-white/10 border border-white/10"
+              title="Borrar todas las respuestas (solo local)"
             >
               <IconTrash />
               <span className="hidden sm:inline">Reset</span>
             </button>
           </div>
-        </div>
+        </div> {/* <-- ESTE cierre faltaba */}
 
         {/* Progress Bar */}
         <div className="h-1.5 bg-white/10">
@@ -890,16 +748,10 @@ export default function VeoliaFeedforwardCanvas() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6">
         <div className="flex flex-wrap items-center gap-2 text-sm text-[var(--text-muted)]">
           <SoftBadge>
-            Avance:{" "}
-            <span className="text-[var(--text)] font-medium ml-1">
-              {answeredCount}/{TOTAL_QUESTIONS}
-            </span>
+            Avance: <span className="text-[var(--text)] font-medium ml-1">{answeredCount}/{TOTAL_QUESTIONS}</span>
           </SoftBadge>
           <SoftBadge>
-            Completado:{" "}
-            <span className="text-[var(--text)] font-medium ml-1">
-              {progressPct}%
-            </span>
+            Completado: <span className="text-[var(--text)] font-medium ml-1">{progressPct}%</span>
           </SoftBadge>
           <SoftBadge>Guardado localmente</SoftBadge>
           {query && <SoftBadge>Filtro activo: “{query}”</SoftBadge>}
@@ -913,23 +765,14 @@ export default function VeoliaFeedforwardCanvas() {
             {/* Block Header */}
             <div className="mb-4 flex items-baseline justify-between">
               <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-[var(--text)]">
-                <span
-                  className={classNames(
-                    "mr-2 rounded-md px-2 py-0.5 text-sm text-slate-900",
-                    `bg-gradient-to-r ${block.color}`
-                  )}
-                >
+                <span className={classNames("mr-2 rounded-md px-2 py-0.5 text-sm text-slate-900", `bg-gradient-to-r ${block.color}`)}>
                   {block.title.split(":")[0]}
                 </span>
                 <span className="opacity-90">
-                  {block.title.split(":")[1]
-                    ? `: ${block.title.split(":")[1]}`
-                    : ""}
+                  {block.title.split(":")[1] ? `: ${block.title.split(":")[1]}` : ""}
                 </span>
               </h2>
-              <div className="text-xs text-[var(--text-muted)]">
-                {block.casillas.length} casillas
-              </div>
+              <div className="text-xs text-[var(--text-muted)]">{block.casillas.length} casillas</div>
             </div>
 
             {/* Casillas Grid */}
@@ -937,30 +780,15 @@ export default function VeoliaFeedforwardCanvas() {
               {block.casillas.map((c) => {
                 const answeredInCasilla = answeredFor(c.id);
                 return (
-                  <article
-                    key={c.id}
-                    className="relative rounded-2xl border border-white/10 bg-[var(--card)] shadow-[0_10px_30px_rgba(0,0,0,0.25)] overflow-hidden"
-                  >
-                    <div
-                      className={classNames(
-                        "absolute inset-x-0 top-0 h-1.5",
-                        `bg-gradient-to-r ${block.color}`
-                      )}
-                    />
+                  <article key={c.id} className="relative rounded-2xl border border-white/10 bg-[var(--card)] shadow-[0_10px_30px_rgba(0,0,0,0.25)] overflow-hidden">
+                    <div className={classNames("absolute inset-x-0 top-0 h-1.5", `bg-gradient-to-r ${block.color}`)} />
                     <div className="p-5 sm:p-6">
                       <div className="flex items-start justify-between gap-3">
-                        <h3 className="text-base sm:text-lg font-semibold leading-tight text-[var(--text)] pr-6">
-                          {c.title}
-                        </h3>
+                        <h3 className="text-base sm:text-lg font-semibold leading-tight text-[var(--text)] pr-6">{c.title}</h3>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-[var(--text-muted)]">
-                            {answeredInCasilla}/{c.preguntas.length}
-                          </span>
+                          <span className="text-xs text-[var(--text-muted)]">{answeredInCasilla}/{c.preguntas.length}</span>
                           {answeredInCasilla === c.preguntas.length && (
-                            <span
-                              className="text-emerald-400"
-                              title="Casilla completa"
-                            >
+                            <span className="text-emerald-400" title="Casilla completa">
                               <IconCheck />
                             </span>
                           )}
@@ -969,10 +797,7 @@ export default function VeoliaFeedforwardCanvas() {
 
                       <div className="mt-3 rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-[var(--text)]">
                         <p className="leading-relaxed">
-                          <span className="font-medium text-cyan-300">
-                            Feedforward:
-                          </span>{" "}
-                          “{c.feedforward}”
+                          <span className="font-medium text-cyan-300">Feedforward:</span> “{c.feedforward}”
                         </p>
                       </div>
 
@@ -987,9 +812,7 @@ export default function VeoliaFeedforwardCanvas() {
                             </label>
                             <textarea
                               value={answers?.[c.id]?.[idx] || ""}
-                              onChange={(e) =>
-                                handleChange(c.id, idx, e.target.value)
-                              }
+                              onChange={(e) => handleChange(c.id, idx, e.target.value)}
                               placeholder="Escribe aquí hallazgos, ejemplos, datos, responsables, fechas, etc."
                               className="
                                 min-h-[88px] w-full resize-y rounded-xl
@@ -1013,11 +836,8 @@ export default function VeoliaFeedforwardCanvas() {
 
         <div className="mt-10 mb-20 text-center text-sm text-[var(--text-muted)]">
           <p>
-            Consejo: usa{" "}
-            <span className="text-[var(--text)] font-medium">Exportar</span>{" "}
-            para compartir o respaldar respuestas, e{" "}
-            <span className="text-[var(--text)] font-medium">Importar</span>{" "}
-            para continuar donde quedaste.
+            Consejo: usa <span className="text-[var(--text)] font-medium">Exportar</span> para bajar lo que hay en Firestore, e{" "}
+            <span className="text-[var(--text)] font-medium">Importar</span> para continuar donde quedaste.
           </p>
         </div>
       </main>
