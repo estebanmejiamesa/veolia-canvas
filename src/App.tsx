@@ -832,7 +832,7 @@ export default function VeoliaFeedforwardCanvas() {
               {progressPct}%
             </span>
           </SoftBadge>
-          <SoftBadge>Guardado localmente</SoftBadge>
+          <SoftBadge>Guardado en la nube</SoftBadge>
           {query && <SoftBadge>Filtro activo: “{query}”</SoftBadge>}
         </div>
       </div>
