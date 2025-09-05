@@ -954,8 +954,16 @@ export default function VeoliaFeedforwardCanvas() {
           <br />
 
           <p className="leading-relaxed">
-            © 2025 IBIIKA S.A.S. All rights reserved. · www.ibiika.com · Esteban
-            Mejía Mesa · emejia@ibiika.com · Cel: +57 318 651 5140
+            © 2025 IBIIKA S.A.S. All rights reserved. ·{" "}
+            <a
+              href="https://www.ibiika.com"
+              target="_blank"
+              rel="noreferrer"
+              className="text-[var(--text)] hover:underline"
+            >
+              www.ibiika.com
+            </a>{" "}
+            · emejia@ibiika.com · Cel: +57 318 651 5140
           </p>
         </div>
       </main>
