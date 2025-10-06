@@ -72,7 +72,7 @@ const BLOCKS: Block[] = [
         feedforward:
           "Queremos conocer hacia dónde se proyecta su operación, para alinear nuestras soluciones al rumbo que están construyendo.",
         preguntas: [
-          "Si tuviera que elegir uno de estos tres caminos como prioridad estratégica -descarbonizar, regenerar o descontaminar-, ¿cuál marcaría el norte de su operación hoy?",
+          "Si tuviera que elegir uno de estos tres caminos como prioridad estratégica -descarbonizar, descontaminar o regenerar/aprovechar/valorizar recursos-, ¿cuál marcaría el norte de su operación hoy?",
           "¿En qué plazo esperan ver avances en esas prioridades: corto (3 meses), medio (6 meses) o más largo (12 meses)?",
         ],
       },
@@ -100,7 +100,7 @@ const BLOCKS: Block[] = [
         preguntas: [
           "¿Qué auditorías, inspecciones o normas recientes han representado mayor reto para su operación?",
           "¿Qué fechas o compromisos regulatorios tienen próximos en el radar (renovación de permisos, reportes, auditorías)?",
-          "¿Qué apoyo adicional de Veolia les daría más tranquilidad frente al cumplimiento regulatorio?",
+          "¿Qué aspectos clave del contexto externo (normas, mercado, stakeholders) debemos considerar para el reto identificado?",
         ],
       },
     ],
@@ -145,7 +145,7 @@ const BLOCKS: Block[] = [
           "Queremos identificar qué situaciones recientes han generado presión en su operación, para encontrar juntos cómo evitar que se repitan.",
         preguntas: [
           "¿Cuáles situaciones recientes (como interrupciones operativas, sanciones, reprocesos o reclamos) han generado mayores costos o dificultades en su operación?",
-          "¿Qué impacto tuvieron esas situaciones en costos, tiempo o imagen de la empresa?",
+          "¿Por qué es relevante resolver este problema y qué impacto tendría lograrlo para su organización?",
           "De estas situaciones, ¿cuál sería la prioridad número uno a prevenir?",
         ],
       },
@@ -185,7 +185,7 @@ const BLOCKS: Block[] = [
           "Queremos aprovechar su experiencia con Veolia para descubrir nuevas soluciones que generen valor adicional en su operación.",
         preguntas: [
           "¿En qué procesos identifican hoy oportunidades claras de mejora, como reducir costos de agua, valorizar residuos o ganar eficiencia energética?",
-          "Si pensaran en mejoras rápidas, ¿qué cambios les gustaría ver resueltos en los próximos 3 a 6 meses?",
+          "Podrían formular su oportunidad prioritaria como un reto de innovación: “¿Cómo podríamos... (lograr X)?” (sin mencionar la posible solución embebida).",
         ],
       },
     ],
@@ -214,7 +214,7 @@ const BLOCKS: Block[] = [
           "¿Qué fechas próximas de renovación o decisiones clave tienen en el radar?",
           "¿Qué pasos iniciales podríamos dar desde ya para asegurar que la próxima renovación sea fluida (por ejemplo, un diagnóstico, piloto o propuesta conjunta)?",
           "¿Qué condiciones serían críticas para que ustedes decidieran no renovar?",
-          "De todo lo conversado, ¿qué oportunidad les entusiasmaría más comenzar de inmediato, sabiendo que podría dar resultados visibles en menos de 6 meses?",
+          "¿Cuáles serían los beneficios esperados (estratégicos, operativos, económicos, ambientales) si resolvemos el reto priorizado?",
         ],
       },
     ],
